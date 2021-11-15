@@ -14,9 +14,9 @@ Just choose which steps and options to be run in your input config file (see exa
   
   The following files/directory are needed for the master script:
 
-  - <mainFolder>/lists containing the MC/runs lists with the following filename structure <TypeOfData>-<phase>-<zenith>deg-<azimuth>deg-<offset>deg.lis for gamma and <TypeOfData>-<phase>-<zenith>deg-<azimuth>deg.lis for gamma-diffusive or background, e.g., Gamma-2d2-20deg-180deg-0.5deg.lis or Offruns-2d3-20deg-180deg.lis
+ <mainFolder>/lists containing the MC/runs lists with the following filename structure <TypeOfData>-<phase>-<zenith>deg-<azimuth>deg-<offset>deg.lis for gamma and <TypeOfData>-<phase>-<zenith>deg-<azimuth>deg.lis for gamma-diffusive or background, e.g., Gamma-2d2-20deg-180deg-0.5deg.lis or Offruns-2d3-20deg-180deg.lis
 
-  - <mainFolder>/<trainingName>/config/ containing the configs, similarly to what is found in /lfs/l7/hess/analysis/version36, e.g.:
+ <mainFolder>/<trainingName>/config/ containing the configs, similarly to what is found in /lfs/l7/hess/analysis/version36, e.g.:
         <mainFolder>/<trainingName>/config/head.conf and <mainFolder>/<trainingName>/config/std_zeta_hybrid/analysis.conf
 
           
