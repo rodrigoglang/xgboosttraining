@@ -1,0 +1,69 @@
+# Which steps to run
+
+MakeEnergyShape: False
+MakeOffEnergyShape: False
+GenerateInputTrees: False
+PlotInputDebug: True
+DoTraining: True
+PlotOutputDebug: True
+GenerateTreesForOptimization: False
+OptimizeCuts: False
+PlotOptimizationResults: False
+FinishLookupTables: False
+
+# Folders
+
+MainDirectory: "/lfs/l7/hess/users/rglang/xgboost/"
+TrainingName: "teste"
+
+# Run options
+
+Configs: ["std_zeta_hybrid"]
+MuonPhases: ["2d2"]
+ZenithAngles: [20]
+AzimuthAngles: [180]
+OffsetAngles: [0.5]
+Signal: "Gamma" # "Gamma", "Gamma-diffusive"
+Background: "Proton" # "Offruns", "Proton", "Selmuon" (for mono)
+VariablesForInputTrees: ["MSCW","Energy","X0","MCTrueImpactParameter","HillasImageAmplitude"]
+Variables: ["MSCW","Energy","HillasImageAmplitude[4]"] #.n if the variable is telescope dependent, e.g., HillasImageAmplitude.5
+VariablesNameForTMVA: [["MSCW", "F"],["X0[4]", "F"],["HillasImageAmplitude[4]","F"]] # name and type of variable in the format that TMVA can read. Unfortunatelly this is needed because HAP can only read the weights with TMVA.
+
+# Energy/Size ranges (size ranges are used for the 2-D mono)
+
+UseEnergyRanges: True
+EnergyRanges: [[0.05, 0.1], [0.1, 0.3], [0.3,0.5], [0.5,1.0], [1.0,2.0], [2.0, 5.], [5.,100.]]
+UseSizeRanges: False
+SizeRanges: [[80,10000]]
+
+# Precuts
+
+PreCuts: ''
+
+# Debugging plots:
+
+InputVariablesToPlot: ["MSCW"] #.n if the variable is telescope dependent, e.g., HillasImageAmplitude.5
+RangeToPlotInputVariables: [[-5,5]] # If [0,0] is given, use automatic range
+
+# Optimization options
+SpectralIndex: 2.6
+NormalizationFactor: 1
+MinimumSignalEfficiency: 0.7
+Verbose: True
+MaxOffrunsEvents: 10 # numevents used to generate optimization tree, set as 0 to use all events
+
+# BDT options - comment out for standard ones - just change these values if you know what you are doing
+
+TestToTrainFraction: 0.1
+MaxEvents: 1000000
+BackgroundToSignalFraction: 2
+Classifier: "XGBRegressor" # "scikit" here just for new tests, but Simon has already tested and seem to be similar
+#n_estimators: 1
+#max_depth: 1
+#learning_rate: 1
+#gamma: 1
+#max_delta_step: 1
+#reg_alpha: 1
+#reg_lambda: 1
+#scale_pos_weight: 1
+n_jobs: 1

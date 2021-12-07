@@ -1,0 +1,73 @@
+# Which steps to run
+
+MakeEnergyShape: False
+MakeOffEnergyShape: False
+GenerateInputTrees: False
+PlotInputDebug: False
+DoTraining: True
+PlotOutputDebug: True
+GenerateTreesForOptimization: False
+OptimizeCuts: False
+PlotOptimizationResults: False
+FinishLookupTables: False
+
+# Folders
+
+MainDirectory: "/lfs/l7/hess/users/rglang/xgboost/"
+TrainingName: "Mono_TimeCleaning1"
+
+# Run options
+
+Configs: ["std_zeta_mono", "std_zeta_mono_strict"]
+MuonPhases: ["2d2", "2d3"]
+ZenithAngles: [20]
+AzimuthAngles: [180]
+#ZenithAngles: [0,20,30,40,45,50,55]
+#AzimuthAngles: [0,180]
+OffsetAngles: [0.5]
+Signal: "Gamma" # "Gamma", "Gamma-diffusive"
+Background: "Offruns" # "Offruns", "Proton", "Selmuon" (for mono)
+VariablesForInputTrees: ["MCTrueImpactParameter", "MCTrueEnergy", "Energy", "HillasImageAmplitude", "HillasLength", "HillasWidth", "HillasSkewness", "HillasKurtosis", "HillasNPix", "HillasLocalDistance", "PsiSq", "Length", "X2", "X0", "Width2", "Width1", "Radius", "ChargeAsym", "TimeGradient", "LogSize", "LengthOverLogSize", "LengthOverSize", "LogDensity", "Known", "Hmax", "MCTrueShowermax", "ZetaBDT", "RunNr", "EventNr", "BunchNr", "MCTrueNominalX", "MCTrueNominalY", "Delta"]
+#VariablesNameForTMVA: [["HillasWidth[4]", "F"], ["HillasLength[4]", "F"], ["LogDensity[4]", "F"], ["LengthOverLogSize[4]", "F"], ["Abs(HillasSkewness[4])", "F"], ["HillasKurtosis[4]", "F"]] #, ["X0[4]", "F"], ["Width2[4]", "F"], ["Width1[4]", "F"], ["Radius[4]", "F"], ["ChargeAsym[4]", "F"], ["TimeGradient[4]", "F"], ["LengthOverLogSize[4]", "F"], ["LengthOverSize[4]", "F"], ["LogDensity[4]", "F"], ["Known[4]", "I"]]
+VariablesNameForTMVA: [["HillasLength[4]", "F"], ["HillasWidth[4]", "F"], ["HillasSkewness[4]", "F"], ["HillasKurtosis[4]", "F"], ["Length[4]", "F"], ["X2[4]", "F"], ["X0[4]", "F"], ["Width2[4]", "F"], ["Width1[4]", "F"], ["Radius[4]", "F"], ["ChargeAsym[4]", "F"], ["TimeGradient[4]", "F"], ["LengthOverLogSize[4]", "F"], ["LengthOverSize[4]", "F"], ["LogDensity[4]", "F"]]
+
+# Energy/Size ranges (size ranges are used for the 2-D mono)
+
+UseEnergyRanges: False
+EnergyRanges: [[0.01,1]]
+UseSizeRanges: True
+SizeRanges: [[250,100000], [400,100000],[80,250],[80,400]]
+
+# Precuts
+
+#PreCuts: [["HillasWidth[4]", [0,1]], ["HillasLength[4]", [0,1]], ["LogDensity[4]",[0.001,20]], ["LengthOverLogSize[4]",[0,0.1]], ["Abs(HillasSkewness[4])", [0,100]]] #, ["HillasKurtosis[4]" , [-0.9,100]]]
+#PreCuts: [["LengthOverSize[4]", [0,1000000]], ["Length[4]", [0,1000000]], ["Width1[4]", [0,1000000]], ["Width2[4]", [0,1000000]], ["Radius[4]", [0,1000000]], ["ChargeAsym[4]", [-99,99]], ["TimeGradient[4]", [-10000,10000]], ["X0[4]", [-99,99]], ["X2[4]", [-99,99]], ["HillasWidth[4]", [0,1000000]], ["HillasLength[4]", [0,1000000]]]
+#PreCuts: 'LengthOverSize[4] > 0 & Length[4] > 0 & Width1[4] > 0 & Width2[4] > 0 & Radius[4] > 0 & ChargeAsym[4] > 0 & TimeGradient[4] > 0 & X0[4] > -99 & X2[0] > -99 & HillasWidth[4] > 0 & HillasLength[4] > 0'
+
+# Debugging plots:
+
+InputVariablesToPlot: ["HillasImageAmplitude[4]", "HillasWidth[4]", "HillasLength[4]", "LogDensity[4]", "LengthOverLogSize[4]", "Abs(HillasSkewness[4])", "HillasKurtosis[4]"] #.n if the variable is telescope dependent, e.g., HillasImageAmplitude.5
+RangeToPlotInputVariables: [[50,5000], [0,0.0], [0,0], [0,0], [0,0], [0,0], [0,0]] # If [0,0] is given, use automatic range
+
+# Optimization options
+SpectralIndex: 2.6
+NormalizationFactor: 1
+MinimumSignalEfficiency: 0.7
+Verbose: True
+MaxOffrunsEvents: 1000000 # numevents used to generate optimization tree, set as 0 to use all events
+
+# BDT options - comment out for standard ones - just change these values if you know what you are doing
+
+TestToTrainFraction: 0.1
+MaxEvents: 10000000
+BackgroundToSignalFraction: 2
+Classifier: "XGBRegressor" # "scikit" here just for new tests, but Simon has already tested and seem to be similar
+#n_estimators: 1
+#max_depth: 1
+#learning_rate: 1
+#gamma: 1
+#max_delta_step: 1
+#reg_alpha: 1
+#reg_lambda: 1
+#scale_pos_weight: 1
+n_jobs: 1
