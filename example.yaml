@@ -1,0 +1,72 @@
+# Which steps to run
+
+MakeEnergyShape: False
+MakeOffEnergyShape: False
+GenerateInputTrees: False
+PlotInputDebug: False
+DoTraining: True
+PlotOutputDebug: True
+GenerateTreesForOptimization: False
+OptimizeCuts: False
+PlotOptimizationResults: False
+FinishLookupTables: False
+
+# Folders
+
+MainDirectory: "/lfs/l7/hess/users/rglang/xgboost-rglang/"
+TrainingName: "classes-hybrid"
+
+# Run options
+
+Configs: ["std_zeta_hybrid_classA", "std_zeta_hybrid_classB"] # hap still looks for keyword like "zeta", "hybrid", "mono", so the scheme of the config name still must be the same even if the new classes are considered. We want to correct this
+MuonPhases: ["2d3"]
+ZenithAngles: [0,20,30,40,45,50,55]
+AzimuthAngles: [180]
+OffsetAngles: [0.5]
+Signal: "Gamma" # "Gamma", "Gamma-diffusive"
+Background: "Offruns" # "Offruns", "Proton", "Selmuon" (for mono)
+VariablesForInputTrees: ["MSCW", "MSCL", "MSCWO", "MSCLO", "Hmax", "AltEvent", "dEoverE", "MCTrueImpactParameter", "MCTrueEnergy", "MCThetaSqr", "Energy", "CorrEnergy"]
+VariablesNameForTMVA: [["MSCW", "F"], ["MSCL","F"], ["MSCWO","F"], ["MSCLO","F"], ["Hmax/(TMath::Cos((90.-AltEvent)/57.3))","F"], ["dEoverE","F"]] # name and type of variable in the format that TMVA can read.
+
+# Ranges for the training
+
+UseEnergyRanges: True
+EnergyRanges: [[0.05,0.1],[0.1,0.3],[0.3,0.5],[0.5,1.0],[1.0,2.0],[2.0,5.0],[5.0,100.0]]
+UseSizeRanges: False
+SizeRanges: [[80,10000]]
+
+# Precuts
+
+#PreCuts: [["HillasWidth[4]", [0,1]], ["HillasLength[4]", [0,1]], ["LogDensity[4]",[0.001,20]], ["LengthOverLogSize[4]",[0,0.1]], ["Abs(HillasSkewness[4])", [0,100]]] #, ["HillasKurtosis[4]" , [-0.9,100]]] # comment out for no precuts
+
+# Debugging plots:
+
+InputVariablesToPlot: ["MSCW","MSCL","MSCWO","MSCLO","Hmax","dEoverE"] #if the variable is telescope dependent use, e.g., HillasImageAmplitude[4]
+RangeToPlotInputVariables: [[-5,5],[-5,5],[-5,5],[-5,5],[0,0],[0,0]] # If [0,0] is given, use automatic range
+
+# Optimization options
+
+SpectralIndex: 2.6
+NormalizationFactor: 0.1
+MinimumSignalEfficiency: 0.4
+Verbose: True
+#MaxOffrunsEvents: 1000000 # numevents used to generate optimization tree, set as 0 to use all events
+
+# BDT options - comment out for standard ones - just change these values if you know what you are doing
+
+TestToTrainFraction: 0.1
+MaxEvents: 10000000
+#MinEvents: 1000
+BackgroundToSignalFraction: 2
+Classifier: "XGBRegressor"
+#n_estimators: 200
+#max_depth: 70
+#learning_rate: 1
+#gamma: 10
+#min_child_weight_percent: 2
+#max_delta_step: 5
+#subsample: 0.8
+#reg_alpha: 1
+#reg_lambda: 0
+#scale_pos_weight: 2
+n_jobs: 1
