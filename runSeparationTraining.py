@@ -13,17 +13,17 @@
 import yaml
 import sys
 import os
-from scripts/readTrees import readInputTrees
-from scripts/plotInputDistributions import plotInputDistributions
-from scripts/doTraining import train
-from scripts/plotOutputInfo import plotOutputInfo
-from scripts/convertWeights import convertWeightsToTMVA
-from scripts/generateLookups import makeLookups_EnergyShape, makeLookups_OffEnergyShape, makeLookups
-from scripts/generateTrees import generateTrees
-from scripts/generateTreesForOptimization import generateInputTreesForOptimization
-from scripts/optimizeCuts import runOptimization
-from scripts/plotOptimization import plotOptimization, GetOptimizedCuts
-import utils
+from scripts.readTrees import readInputTrees
+from scripts.plotInputDistributions import plotInputDistributions
+from scripts.doTraining import train
+from scripts.plotOutputInfo import plotOutputInfo
+from scripts.convertWeights import convertWeightsToTMVA
+from scripts.generateLookups import makeLookups_EnergyShape, makeLookups_OffEnergyShape, makeLookups
+from scripts.generateTrees import generateTrees
+from scripts.generateTreesForOptimization import generateInputTreesForOptimization
+from scripts.optimizeCuts import runOptimization
+from scripts.plotOptimization import plotOptimization, GetOptimizedCuts
+import scripts.utils as utils
 import shutil
 
 if (len(sys.argv) != 2):
