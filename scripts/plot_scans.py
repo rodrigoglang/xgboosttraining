@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from optimize import mkdir
+from scripts.optimize import mkdir
 import sys
 
 plt.interactive(0)

@@ -1,12 +1,12 @@
 import yaml
 import sys
 import os
-from readTrees import readInputTrees
-from plotInputDistributions import plotInputDistributions
-from doTraining import train
-from plotOutputInfo import plotOutputInfo
-from convertWeights import convertWeightsToTMVA
-import utils
+from scripts.readTrees import readInputTrees
+from scripts.plotInputDistributions import plotInputDistributions
+from scripts.doTraining import train
+from scripts.plotOutputInfo import plotOutputInfo
+from scripts.convertWeights import convertWeightsToTMVA
+import scripts.utils as utils
 
 energyRange = []
 sizeRange = []

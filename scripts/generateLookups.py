@@ -1,6 +1,6 @@
 import os
 import sys
-import utils
+import scripts.utils as utils
 
 def makeLookups_EnergyShape(workDirectory, config, environmentVariables):
     if not os.path.exists(workDirectory + "/config/" + config + "/analysis.conf"):

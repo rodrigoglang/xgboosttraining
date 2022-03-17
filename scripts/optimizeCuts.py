@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import binned_statistic
 import uproot
-import optimize
+import scripts.optimize as optimize
 from glob import glob
 import time
 import os, sys

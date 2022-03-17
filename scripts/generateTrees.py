@@ -1,6 +1,6 @@
 import os
 import sys
-import utils
+import scripts.utils as utils
 
 def getMuonEntry(muonPhase):
 
