@@ -39,12 +39,12 @@ def makeLookups(task, workDirectory, config, environmentVariables, thetaSqr=0, z
 
 def makeLookups_OffEnergyShape(workDirectory, config, zenithAngles, muonPhase, environmentVariables):
 
-    if (not os.path.exists("MakeScaleOff.C")):
+    if (not os.path.exists("scripts/MakeScaleOff.C")):
         sys.exit("ERROR! Couldn't find script 'MakeScaleOff.C'. Please make sure it is in the same directory as the python folders.")
-    if (not os.path.exists("lists/")):
-        sys.exit("ERROR! No folder 'lists/'. Please create one and provide the lists of offruns as 'lists/OffRuns_??deg.list'.")
-    if (not os.listdir("lists/")):
-        sys.exit("ERROR! No offruns lists found in 'lists/'. Please provide them as 'OffRuns_??deg.list'.")
+    if (not os.path.exists(workDirectory + "/lists")):
+        sys.exit("ERROR! No subdirectory 'lists/'. Please create one and provide the lists of offruns as 'lists/Offruns-??deg-??deg.list'.")
+    if (not os.listdir(workDirectory + "/lists/")):
+        sys.exit("ERROR! No offruns lists found in 'lists/'. Please provide them as 'OffRuns-??deg-??deg.list'.")
 
     print('   -> Submitting hap jobs to prepare offshape lookup creation')
     #if muonPhase == '1b':
@@ -52,10 +52,12 @@ def makeLookups_OffEnergyShape(workDirectory, config, zenithAngles, muonPhase, e
     #else:
     #    configFile = workDirectory + '/config/' + config + '/lookups_bgm.conf'
 
+    if not os.path.exists(workDirectory + '/temp_scripts'):
+        os.mkdir(workDirectory + '/temp_scripts')
+
     if not os.path.exists(workDirectory + '/temp_scripts/empty.conf'):
         f = open(workDirectory + '/temp_scripts/empty.conf', "w")
         f.close()
-    #    sys.exit("ERROR! Config file for the offshape lookups not present: " + configFile)
 
     if not os.path.exists(workDirectory + "/logs/"):
         os.mkdir(workDirectory + "/logs/")
@@ -68,17 +70,21 @@ def makeLookups_OffEnergyShape(workDirectory, config, zenithAngles, muonPhase, e
 
     jobsOffEnergyShape=[]
 
+    os.system('cp ' + workDirectory + '/config/' + config + '/analysis.conf ' + workDirectory + '/config/' + config + '/analysis_temp.conf')
+    os.system("sed -i 's/WorkDir/\#WorkDir/g' " + workDirectory + "/config/" + config + "/analysis.conf")
+    os.system("sed -i 's/HillasReco::ScaledParameters.LookupName/\#HillasReco::ScaledParameters.LookupName/g' " + workDirectory + "/config/" + config + "/analysis.conf")
+
     for zenith in zenithAngles:
         logFile = workDirectory + '/logs/' + 'OffShapeLookups_{}_{}degzenith'.format(config, zenith)
         output = 'OffShapeLookups_{}_{}degzenith'.format(config, zenith)
-        listName = 'lists/Offruns-{}-{}deg-180deg.lis'.format(muonPhase,zenith)
+        listName = workDirectory + '/lists/Offruns-{}-{}deg-180deg.lis'.format(muonPhase,zenith)
         command = 'export HESSCONFIG={}; '.format(workDirectory + '/config/')
         command += '{}/hddst/scripts/hap_split.pl --include {} --runlist {} --outfile {}' \
                ' --outdir {}/hap'.format(environmentVariables["HESSROOT"], workDirectory + '/temp_scripts/empty.conf', listName, output, workDirectory)
         command += ' --config ' + config + ' --UseHESSIILookups true --Diagnostics/DiagnosticFolder Preselect --Diagnostics/ListOfVariables HillasImageAmplitude,HillasWidth,HillasLength,ImpactParameter,CameraXEvent,CameraYEvent'
         command += ' --Diagnostics/WriteEventTree true --Background/Method PMBg --Background/FOV 3.0 --Background/AcceptanceFromData false --Background/MaximumEventOffset 2.5 --Background/UseTelPdependent true'
-        #command  += " --EnergyAndShapeLookups/OutputFile {} ".format(workDirectory+"/hap/test")
-        #command  += " --EnergyAndShapeLookups/AzimuthOverride 0"
+        command  += " --EnergyAndShapeLookups/OutputFile {} ".format(workDirectory+"/hap/test")
+        command  += " --EnergyAndShapeLookups/AzimuthOverride 0"
 
         print(command)
         jobsOffEnergyShape.append(utils.submit_job_qrun(command, logFile))
@@ -87,7 +93,7 @@ def makeLookups_OffEnergyShape(workDirectory, config, zenithAngles, muonPhase, e
 
     protoDir = workDirectory + '/config/' + config + '/offShape/proto_lookups/'
     utils.mkdir(protoDir)
-    offLookupsScript = 'MakeScaleOff.C' # ?!
+    offLookupsScript = 'scripts/MakeScaleOff.C' # ?!
 
     print('   -> Merging trees into TProfile2Ds which will later be used to make lookups')
     # If the MakeScaleOff.C script was somehow changed, this will fail because the script is compiled many times
@@ -110,6 +116,13 @@ def makeLookups_OffEnergyShape(workDirectory, config, zenithAngles, muonPhase, e
 
         output = 'OffShapeLookups_{}_{}degzenith'.format(config, zenith)
         inFilename = '{}/{}_events.root'.format(workDirectory + '/hap/', output)
+
+        haddScriptName = 'hadd_offshape_lookups_' + config + '_' + str(zenith) + 'deg'
+        haddLogFile = '{}/logs/OffShapeLookupsHadd_{}_{}deg'.format(workDirectory, config, zenith)
+        haddCommand = 'hadd -f ' + workDirectory + '/hap/OffShapeLookups_' + config + '_' + str(zenith) + 'degzenith_events.root ' + workDirectory + '/hap/OffShapeLookups_' + config + '_' + str(zenith) + 'degzenith/events*.root'
+        hadd_job_id = utils.submit_job_ws(haddCommand, haddScriptName, False, haddLogFile, workDirectory + "/temp_scripts/")
+        utils.wait_for_jobs_to_finish([hadd_job_id]) # this part had to be added since hap_split.pl doesn't generate _events.root as a standard. For some people this might be the case and then this step will be done twice. But better safe than sorry.
+
         outFilename = '{}/proto_lookup_{}.root'.format(workDirectory + '/config/' + config + '/offShape/proto_lookups', zenith)
         command = "root -q -b -l '{}+".format(offLookupsScript)
         command += '''("{}","{}",{},{})' '''.format(inFilename, outFilename, zenith, isHybrid)
