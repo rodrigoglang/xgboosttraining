@@ -230,7 +230,7 @@ if (makeEnergyShape or makeOffEnergyShape):
                 newjobs = makeLookups_EnergyShape(workDirectory, config, environmentVariables)
                 jobs = jobs + newjobs
             if (makeOffEnergyShape):
-                newjobs = makeLookups_OffEnergyShape(workDirectory, config, zenithAngles, muonPhase, environmentVariables) # MAS E O MUON PHASE?
+                newjobs = makeLookups_OffEnergyShape(workDirectory, config, zenithAngles, muonPhase, environmentVariables)
                 jobs = jobs + newjobs
         utils.wait_for_jobs_to_finish(jobs)
         jobs = []
@@ -255,11 +255,24 @@ if (generateInputTrees):
         print(" -> Config: " + config)
         for muonPhase in muonPhases:
             print("  -> Muon phase: " + muonPhase)
-            newjobs = generateTrees(workDirectory, config, signal, variablesForInputTrees, muonPhase, zenithAngles, azimuthAngles, offsetAngles, environmentVariables, maxOffrunsEventsForInputTrees)
-            jobs = jobs + newjobs
-            newjobs = generateTrees(workDirectory, config, background, variablesForInputTrees, muonPhase, zenithAngles, azimuthAngles, offsetAngles, environmentVariables, maxOffrunsEventsForInputTrees)
-            jobs = jobs + newjobs
-    utils.wait_for_jobs_to_finish(jobs)
+#            newjobs = generateTrees(workDirectory, config, signal, variablesForInputTrees, muonPhase, zenithAngles, azimuthAngles, offsetAngles, environmentVariables, maxOffrunsEventsForInputTrees)
+#            jobs = jobs + newjobs
+#            newjobs = generateTrees(workDirectory, config, background, variablesForInputTrees, muonPhase, zenithAngles, azimuthAngles, offsetAngles, environmentVariables, maxOffrunsEventsForInputTrees)
+#            jobs = jobs + newjobs
+#    utils.wait_for_jobs_to_finish(jobs)
+    jobs = []
+    for config in configs:
+        os.system('rm ' + workDirectory + '/config/' + config + '/analysis.conf')
+        for muonPhase in muonPhases:
+            for zenith in zenithAngles:
+                for azimuth in azimuthAngles:
+                    haddScriptName = 'hadd_offruns_' + config + '_' + muonPhase + '_' + str(zenith) + 'deg_' + str(azimuth) + 'deg'
+                    haddLogFile = workDirectory + '/logs/OffrunsHadd_' + config + '_' + muonPhase + '_' + str(zenith) + 'deg_' + str(azimuth) + 'deg'
+                    haddCommand = 'hadd -f ' + workDirectory + '/hap/Offruns_' + config + '_' + muonPhase + '_' + str(zenith) + 'deg_' + str(azimuth) + 'deg_events.root ' + workDirectory + '/hap/Offruns_' + config + '_' + muonPhase + '_' + str(zenith) + 'deg_' + str(azimuth) + 'deg/events*.root'
+                    hadd_job_id = utils.submit_job_ws(haddCommand, haddScriptName, False, haddLogFile, workDirectory + "/temp_scripts/")
+                    jobs.append(hadd_job_id)
+    utils.wait_for_jobs_to_finish(jobs) # this part had to be added since hap_split.pl doesn't generate _events.root as a standard. For some people this might be the case and then this step will be done twice. But better safe than sorry.
+
 
 if (plotInputDebug or doTraining or plotOutputDebug):
 
@@ -300,7 +313,7 @@ if (plotInputDebug or doTraining or plotOutputDebug):
                             f = open(workDirectory + '/temp_scripts/Training_' + config + '_' + muonPhase + '_' + str(zenith) + 'deg_' + str(azimuth) + 'deg_' + str(offset) + 'deg.sh','w')
                             f.write("#!/bin/bash")
                             f.write("\n")
-                            f.write('python submitTraining.py ' + sys.argv[1] + ' ' + config + ' ' + muonPhase + ' ' + str(zenith) + ' ' + str(azimuth) + ' ' + str(offset) + ' ' + str(energyRange[0]) + ' ' + str(energyRange[1]) + ' ' + str(sizeRange[0]) + ' ' + str(sizeRange[1]))
+                            f.write('python scripts/submitTraining.py ' + sys.argv[1] + ' ' + config + ' ' + muonPhase + ' ' + str(zenith) + ' ' + str(azimuth) + ' ' + str(offset) + ' ' + str(energyRange[0]) + ' ' + str(energyRange[1]) + ' ' + str(sizeRange[0]) + ' ' + str(sizeRange[1]))
                             f.close()
                             command = workDirectory + '/temp_scripts/Training_' + config + '_' + muonPhase + '_' + str(zenith) + 'deg_' + str(azimuth) + 'deg_' + str(offset) + 'deg.sh'
                             logFile = workDirectory + '/logs/Training_' + config + '_' + muonPhase + '_' + str(zenith) + 'deg_' + str(azimuth) + 'deg_' + str(offset) + 'deg.log'
@@ -315,7 +328,7 @@ if (plotInputDebug or doTraining or plotOutputDebug):
                                 f = open(workDirectory + '/temp_scripts/Training_' + config + '_' + muonPhase + '_' + str(zenith) + 'deg_' + str(azimuth) + 'deg_' + str(offset) + 'deg_' + str(energyRange[0]) + 'to' + str(energyRange[1]) + 'TeV.sh','w')
                                 f.write("#!/bin/bash")
                                 f.write("\n")
-                                f.write('python submitTraining.py ' + sys.argv[1] + ' ' + config + ' ' + muonPhase + ' ' + str(zenith) + ' ' + str(azimuth) + ' ' + str(offset) + ' ' + str(energyRange[0]) + ' ' + str(energyRange[1]) + ' ' + str(sizeRange[0]) + ' ' + str(sizeRange[1]))
+                                f.write('python scripts/submitTraining.py ' + sys.argv[1] + ' ' + config + ' ' + muonPhase + ' ' + str(zenith) + ' ' + str(azimuth) + ' ' + str(offset) + ' ' + str(energyRange[0]) + ' ' + str(energyRange[1]) + ' ' + str(sizeRange[0]) + ' ' + str(sizeRange[1]))
                                 f.close()
                                 command = workDirectory + '/temp_scripts/Training_' + config + '_' + muonPhase + '_' + str(zenith) + 'deg_' + str(azimuth) + 'deg_' + str(offset) + 'deg_' + str(energyRange[0]) + 'to' + str(energyRange[1]) + 'TeV.sh'
                                 logFile = workDirectory + '/logs/Training_' + config + '_' + muonPhase + '_' + str(zenith) + 'deg_' + str(azimuth) + 'deg_' + str(offset) + 'deg_' + str(energyRange[0]) + 'to' + str(energyRange[1]) + 'TeV.log'
@@ -330,7 +343,7 @@ if (plotInputDebug or doTraining or plotOutputDebug):
                                 f = open(workDirectory + '/temp_scripts/Training_' + config + '_' + muonPhase + '_' + str(zenith) + 'deg_' + str(azimuth) + 'deg_' + str(offset) + 'deg_' + str(sizeRange[0]) + 'to' + str(sizeRange[1]) + 'pe.sh','w')
                                 f.write("#!/bin/bash")
                                 f.write("\n")
-                                f.write('python submitTraining.py ' + sys.argv[1] + ' ' + config + ' ' + muonPhase + ' ' + str(zenith) + ' ' + str(azimuth) + ' ' + str(offset) + ' ' + str(energyRange[0]) + ' ' + str(energyRange[1]) + ' ' + str(sizeRange[0]) + ' ' + str(sizeRange[1]))
+                                f.write('python scripts/submitTraining.py ' + sys.argv[1] + ' ' + config + ' ' + muonPhase + ' ' + str(zenith) + ' ' + str(azimuth) + ' ' + str(offset) + ' ' + str(energyRange[0]) + ' ' + str(energyRange[1]) + ' ' + str(sizeRange[0]) + ' ' + str(sizeRange[1]))
                                 f.close()
                                 command = workDirectory + '/temp_scripts/Training_' + config + '_' + muonPhase + '_' + str(zenith) + 'deg_' + str(azimuth) + 'deg_' + str(offset) + 'deg_' + str(sizeRange[0]) + 'to' + str(sizeRange[1]) + 'pe.sh'
                                 logFile = workDirectory + '/logs/Training_' + config + '_' + muonPhase + '_' + str(zenith) + 'deg_' + str(azimuth) + 'deg_' + str(offset) + 'deg_' + str(sizeRange[0]) + 'to' + str(sizeRange[1]) + 'pe.log'

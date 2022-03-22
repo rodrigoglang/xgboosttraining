@@ -70,9 +70,12 @@ def makeLookups_OffEnergyShape(workDirectory, config, zenithAngles, muonPhase, e
 
     jobsOffEnergyShape=[]
 
-    os.system('cp ' + workDirectory + '/config/' + config + '/analysis.conf ' + workDirectory + '/config/' + config + '/analysis_temp.conf')
-    os.system("sed -i 's/WorkDir/\#WorkDir/g' " + workDirectory + "/config/" + config + "/analysis.conf")
-    os.system("sed -i 's/HillasReco::ScaledParameters.LookupName/\#HillasReco::ScaledParameters.LookupName/g' " + workDirectory + "/config/" + config + "/analysis.conf")
+    if 'hybrid' in config:
+
+        if not os.path.exists(workDirectory + '/config/' + config + '/analysis_prelookups.conf'):
+            sys.error("ERROR! You have not defined the basic configuration file: analysis_prelookups.conf! Please do so before running!")
+        os.system('cp ' + workDirectory + '/config/' + config + '/analysis_prelookups.conf ' + workDirectory + '/config/' + config + '/analysis.conf')
+        #This is step is need otherwise hap will try to read the lookups and weights which are not yet generated and will break
 
     for zenith in zenithAngles:
         logFile = workDirectory + '/logs/' + 'OffShapeLookups_{}_{}degzenith'.format(config, zenith)
@@ -90,6 +93,9 @@ def makeLookups_OffEnergyShape(workDirectory, config, zenithAngles, muonPhase, e
         jobsOffEnergyShape.append(utils.submit_job_qrun(command, logFile))
 
     utils.wait_for_jobs_to_finish(jobsOffEnergyShape)
+
+    if 'hybrid' in config:
+        os.system('rm' + workDirectory + '/config/' + config + '/analysis.conf')
 
     protoDir = workDirectory + '/config/' + config + '/offShape/proto_lookups/'
     utils.mkdir(protoDir)
