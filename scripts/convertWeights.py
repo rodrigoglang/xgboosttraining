@@ -1,7 +1,7 @@
 import os
 import xgboost
 from importlib import reload
-import scripts.xgboost2tmva as xgboost2tmva
+import xgboost2tmva as xgboost2tmva
 import uproot
 import numpy as np
 
