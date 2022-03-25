@@ -115,7 +115,7 @@ def generateTrees(workDirectory, config, data, variables, muonPhase, zenithAngle
                 elif (data == 'Offruns'):
                     command += environmentVariables["HESSROOT"] + '/hddst/scripts/hap_split.pl '
                     command += ' --runlist ' + workDirectory + '/lists/' + data + '-' + muonPhase + '-' + str(zenith) + 'deg-' + str(azimuth) + 'deg.lis'
-                    command += ' --Background/Method PMBg --Background/FOV 3.0 --Background/AcceptanceFromData false --Background/MaximumEventOffset 2.5 --Background/UseTelPdependent true'
+                    #command += ' --Background/Method PMBg --Background/FOV 3.0 --Background/AcceptanceFromData false --Background/MaximumEventOffset 2.5 --Background/UseTelPdependent true'
                 command += ' --include ' + workDirectory + '/temp_scripts/empty.conf --config ' + config + ' --outdir ' + workDirectory + '/hap/ --outfile ' + output
                 command += ' --Analysis/MuonEntry ' + str(getMuonEntry(muonPhase))
                 if (data == 'Offruns' and maxOffrunsEvents != 0):
@@ -127,8 +127,8 @@ def generateTrees(workDirectory, config, data, variables, muonPhase, zenithAngle
                 if (data == 'Proton' or data == 'Selmuon' or data == 'Gamma-diffusive'):
                     command += ' --Diagnostics/WriteEventTree true --Diagnostics/DiagnosticFolder Preselect --Diagnostics/ListOfVariables '
                 elif (data == 'Offruns'):
-                    command += ' --Diagnostics/WriteEventTree true --Diagnostics/DiagnosticFolder PMBgMaker_Off --Diagnostics/ListOfVariables '
-                    #command += ' --Diagnostics/WriteEventTree true --Diagnostics/DiagnosticFolder Preselect --Diagnostics/ListOfVariables '
+                    #command += ' --Diagnostics/WriteEventTree true --Diagnostics/DiagnosticFolder PMBgMaker_Off --Diagnostics/ListOfVariables '
+                    command += ' --Diagnostics/WriteEventTree true --Diagnostics/DiagnosticFolder Preselect --Diagnostics/ListOfVariables '
 
                 for var in variables:
                     command += var + ','

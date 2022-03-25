@@ -50,8 +50,10 @@ def generateInputTreesForOptimization(workDirectory, config, muonPhase, zenith, 
 
     jobs=[]
 
-    f = open('empty.conf', 'w')
-    f.close() #I know this looks really bad, but hap_split.pl just can't handle no include config and all the option in the command line. Please forgive me for that
+    if not os.path.exists(workDirectory + '/config/' + config + '/analysis_prelookups.conf'):
+        sys.error("ERROR! You have not defined the basic configuration file: analysis_prelookups.conf! Please do so before running!")
+    os.system('cp ' + workDirectory + '/config/' + config + '/analysis_prelookups.conf ' + workDirectory + '/config/' + config + '/analysis.conf')
+    #This is step is need otherwise hap will try to read the lookups and weights which are not yet generated and will break
 
     offsetString = str(offset).replace('.', 'd')
     output = 'Optimization-Gamma_{}_{}_{}deg_{}deg_{}deg'.format(config, muonPhase, zenith, azimuth, offsetString)
@@ -60,17 +62,26 @@ def generateInputTreesForOptimization(workDirectory, config, muonPhase, zenith, 
     if not os.path.exists(workDirectory + '/logs/'):
         os.mkdir(workDirectory + '/logs/')
 
+    if 'hybrid' in config:
+
+        os.system('echo " " >> ' + workDirectory + '/config/' + config + '/analysis.conf')
+        os.system('echo "[Preselect]" >> ' + workDirectory + '/config/' + config + '/analysis.conf')
+        os.system('echo "  HillasReco::ScaledParameters.LookupName = ScaleInfoOff.root" >> ' + workDirectory + '/config/' + config + '/analysis.conf')
+        os.system('echo " " >> ' + workDirectory + '/config/' + config + '/analysis.conf')
+        os.system('echo "[TMVA]" >> ' + workDirectory + '/config/' + config + '/analysis.conf')
+        os.system('echo "  WorkDir = ' + workDirectory + '/config/' + config + '/' + muonPhase + '" >> ' + workDirectory + '/config/' + config + '/analysis.conf')
+        #This is step is need otherwise hap will try to read the weights which are not yet generated and will break
+
+
     command = 'export HESSCONFIG=' + workDirectory + '/config/' + '; export HESSDST={}; export HESSDATA={};'.format(environmentVariables["HESSDST"],environmentVariables["HESSDATA"])
     command += environmentVariables["HESSROOT"] + '/hddst/scripts/hap_split_mc.pl '
     command += '--include empty.conf --config ' + config + ' --outdir ' + workDirectory + '/hap/ --outfile ' + output
-    command += ' --mc true --filelist lists/Gamma-' + muonPhase + '-' + str(zenith) + 'deg-' + str(azimuth) + 'deg-' + str(offset) + 'deg.lis'
+    command += ' --mc true --filelist ' + workDirectory + '/lists/Gamma-' + muonPhase + '-' + str(zenith) + 'deg-' + str(azimuth) + 'deg-' + str(offset) + 'deg.lis'
     command += ' --Analysis/MuonEntry ' + str(getMuonEntry(muonPhase))
     command += ' --Diagnostics/WriteEventTree true --Diagnostics/DiagnosticFolder Preselect --Diagnostics/ListOfVariables RunNr,AltEvent,AzEvent,CorrEnergy,MCTrueEnergy,MCTrueAlt,MCTrueAzimuth,ZetaBDT,HillasImageAmplitude,MCThetaSqr'
-#    command += ' --Preselect/HillasReco::ScaledParameters.LookupName ScaleInfoOff.root' # if this is not given, hap won't calculate the zetaBDT values
-# PRECISO CORRIGIR PRO MONO    command += ' --TMVA/WorkDir ' + workDirectory + '/config/' + config + '/' + muonPhase
 
-    if not os.path.exists('lists/Gamma-' + muonPhase + '-' + str(zenith) + 'deg-' + str(azimuth) + 'deg-' + str(offset) + 'deg.lis'):
-        sys.exit("ERROR! Couldn't find the list file: " + 'lists/Gamma-' + muonPhase + '-' + str(zenith) + 'deg-' + str(azimuth) + 'deg-' + str(offset) + 'deg.lis')
+    if not os.path.exists(workDirectory + '/lists/Gamma-' + muonPhase + '-' + str(zenith) + 'deg-' + str(azimuth) + 'deg-' + str(offset) + 'deg.lis'):
+        sys.exit("ERROR! Couldn't find the list file: " + workDirectory + '/lists/Gamma-' + muonPhase + '-' + str(zenith) + 'deg-' + str(azimuth) + 'deg-' + str(offset) + 'deg.lis')
 
     jobs.append(utils.submit_job_qrun(command, logFile))
 
@@ -80,19 +91,17 @@ def generateInputTreesForOptimization(workDirectory, config, muonPhase, zenith, 
 
     command = 'export HESSCONFIG=' + workDirectory + '/config/' + '; export HESSDST={}; export HESSDATA={};'.format(environmentVariables["HESSDST"],environmentVariables["HESSDATA"])
     command += environmentVariables["HESSROOT"] + '/hddst/scripts/hap_split.pl '
-    command += ' --runlist lists/Offruns-' + muonPhase + '-' + str(zenith) + 'deg-' + str(azimuth) + 'deg.lis'
+    command += ' --runlist ' + workDirectory + '/lists/Offruns-' + muonPhase + '-' + str(zenith) + 'deg-' + str(azimuth) + 'deg.lis'
     command += ' --include empty.conf --config ' + config + ' --outdir ' + workDirectory + '/hap/ --outfile ' + output
     command += ' --Analysis/MuonEntry ' + str(getMuonEntry(muonPhase))
     command += ' --Background/Method PMBg --Background/FOV 3.0 --Background/AcceptanceFromData false --Background/MaximumEventOffset 2.5 --Background/UseTelPdependent true'
     command += ' --Diagnostics/WriteEventTree true --Diagnostics/DiagnosticFolder PMBgMaker_Off --Diagnostics/ListOfVariables RunNr,RaSystem,DecSystem,RaEvent,DecEvent,CorrEnergy,ZetaBDT,HillasImageAmplitude'
-#    command += ' --Preselect/HillasReco::ScaledParameters.LookupName ScaleInfoOff.root' # if this is not given, hap won't calculate the zetaBDT values
-# PRECISO CORRIGIR PRO MONO    command += ' --TMVA/WorkDir ' + workDirectory + '/config/' + config + '/' + muonPhase
 
     if (maxEventsForOffruns != 0):
         command += ' --numevents ' + str(maxEventsForOffruns)
 
-    if not os.path.exists('lists/Offruns-' + muonPhase + '-' + str(zenith) + 'deg-' + str(azimuth) + 'deg.lis'):
-        sys.exit("ERROR! Couldn't find the list file: " + 'lists/Offruns-' + muonPhase + '-' + str(zenith) + 'deg-' + str(azimuth) + 'deg.lis')
+    if not os.path.exists(workDirectory + '/lists/Offruns-' + muonPhase + '-' + str(zenith) + 'deg-' + str(azimuth) + 'deg.lis'):
+        sys.exit("ERROR! Couldn't find the list file: " + workDirectory + '/lists/Offruns-' + muonPhase + '-' + str(zenith) + 'deg-' + str(azimuth) + 'deg.lis')
 
     jobs.append(utils.submit_job_qrun(command, logFile))
 

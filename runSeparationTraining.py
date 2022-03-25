@@ -254,11 +254,11 @@ if (generateInputTrees):
         print(" -> Config: " + config)
         for muonPhase in muonPhases:
             print("  -> Muon phase: " + muonPhase)
-#            newjobs = generateTrees(workDirectory, config, signal, variablesForInputTrees, muonPhase, zenithAngles, azimuthAngles, offsetAngles, environmentVariables, maxOffrunsEventsForInputTrees)
-#            jobs = jobs + newjobs
-#            newjobs = generateTrees(workDirectory, config, background, variablesForInputTrees, muonPhase, zenithAngles, azimuthAngles, offsetAngles, environmentVariables, maxOffrunsEventsForInputTrees)
-#            jobs = jobs + newjobs
-#    utils.wait_for_jobs_to_finish(jobs)
+            newjobs = generateTrees(workDirectory, config, signal, variablesForInputTrees, muonPhase, zenithAngles, azimuthAngles, offsetAngles, environmentVariables, maxOffrunsEventsForInputTrees)
+            jobs = jobs + newjobs
+            newjobs = generateTrees(workDirectory, config, background, variablesForInputTrees, muonPhase, zenithAngles, azimuthAngles, offsetAngles, environmentVariables, maxOffrunsEventsForInputTrees)
+            jobs = jobs + newjobs
+    utils.wait_for_jobs_to_finish(jobs)
     jobs = []
     for config in configs:
         os.system('rm ' + workDirectory + '/config/' + config + '/analysis.conf')
@@ -367,6 +367,10 @@ if (plotInputDebug or doTraining or plotOutputDebug):
                     fileToBeJoined = workDirectory + "/config/" + config + "/" + muonPhase + "/v4.2/weights/ScaledEff2_" + config + "*zenith*pe.root"
                     os.system("hadd " + scaledEfficiencyROOTFile + " " + fileToBeJoined)
                 os.system("rm " + fileToBeJoined)
+                for zenith in zenithAngles:
+                    os.system("scripts/checkMissingWeights.sh " + workDirectory + "/config/" + config + "/" + muonPhase + "/v4.2/weights/ " + config + " " + str(zenith))
+
+    
 
     print("\n-> Finished the training for all the combinations of input variables.")
 
